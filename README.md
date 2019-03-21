@@ -32,3 +32,4 @@ This project has adopted the [Microsoft Open Source Code of Conduct](https://ope
 - the documentation for the Microsoft identity platform for developers is available from [https://aka.ms/aadv2](https://aka.ms/aadv2)
 - Other samples for the Microsoft identity platform for developers are available from [https://aka.ms/aaddevsamplesv2](https://aka.ms/aaddevsamplesv2)
 - The conceptual documentation for MSAL.NET is available from [https://aka.ms/msalnet](https://aka.ms/msalnet)
+
