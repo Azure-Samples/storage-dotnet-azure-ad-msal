@@ -1,57 +1,34 @@
-# Project Name
+---
+services: active-directory
+platforms: dotnet
+author: maliksahil
+level: 200
+client: ASP.NET Core .Web App
+service: Microsoft Graph, Azure Storage, ASP.NET Core Web API
+endpoint: AAD v2.0
+---
+# Tutorial - Enable your Web Apps to sign-in users and call Azure storage APIs with the Microsoft identity platform for developers
 
-(short, 1-3 sentenced, description of the project)
+This is accompanying code sample for the article at https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-app
 
-## Features
+## Community Help and Support
 
-This project framework provides the following features:
+Use [Stack Overflow](http://stackoverflow.com/questions/tagged/msal) to get support from the community.
+Ask your questions on Stack Overflow first and browse existing issues to see if someone has asked your question before.
+Make sure that your questions or comments are tagged with [`msal` `dotnet`].
 
-* Feature 1
-* Feature 2
-* ...
+If you find a bug in the sample, please raise the issue on [GitHub Issues](../../issues).
 
-## Getting Started
+To provide a recommendation, visit the following [User Voice page](https://feedback.azure.com/forums/169401-azure-active-directory).
 
-### Prerequisites
+## Contributing
 
-(ideally very short, if any)
+If you'd like to contribute to this sample, see [CONTRIBUTING.MD](/CONTRIBUTING.md).
 
-- OS
-- Library version
-- ...
+This project has adopted the [Microsoft Open Source Code of Conduct](https://opensource.microsoft.com/codeofconduct/). For more information, see the [Code of Conduct FAQ](https://opensource.microsoft.com/codeofconduct/faq/) or contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additional questions or comments.
 
-### Installation
+## Other samples and documentation
 
-(ideally very short)
-
-- npm install [package name]
-- mvn install
-- ...
-
-### Quickstart
-(Add steps to get up and running quickly)
-
-1. git clone [repository clone url]
-2. cd [respository name]
-3. ...
-
-
-## Demo
-
-A demo app is included to show how to use the project.
-
-To run the demo, follow these steps:
-
-(Add steps to start up the demo)
-
-1.
-2.
-3.
-
-## Resources
-
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...
+- the documentation for the Microsoft identity platform for developers is available from [https://aka.ms/aadv2](https://aka.ms/aadv2)
+- Other samples for the Microsoft identity platform for developers are available from [https://aka.ms/aaddevsamplesv2](https://aka.ms/aaddevsamplesv2)
+- The conceptual documentation for MSAL.NET is available from [https://aka.ms/msalnet](https://aka.ms/msalnet)
