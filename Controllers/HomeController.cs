@@ -46,31 +46,27 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
             var scopes = new string[] { "https://storage.azure.com/user_impersonation" };
             try
             {
-                var accessToken = 
+                var accessToken =
                     await _tokenAcquisition.GetAccessTokenOnBehalfOfUser(HttpContext, scopes);
-                // create a blob on behalf of the user
-                TokenCredential tokenCredential = new TokenCredential(accessToken);
-                StorageCredentials storageCredentials = new StorageCredentials(tokenCredential);
-
-                // replace the URL below with your storage account URL
-                CloudBlockBlob blob = new CloudBlockBlob(new Uri("https://blobstorageazuread.blob.core.windows.net/sample-container/Blob1.txt"), storageCredentials); 
-                await blob.UploadTextAsync("Blob created by Azure AD authenticated user.");
-
-                ViewData["Message"] = "Blob successfully created";
+                ViewData["Message"] = await CreateBlob(accessToken);
                 return View();
             }
             catch (MsalUiRequiredException ex)
             {
-                if (CanbeSolvedByReSignInUser(ex))
-                {
-                    AuthenticationProperties properties = BuildAuthenticationPropertiesForIncrementalConsent(scopes, ex);
-                    return Challenge(properties);
-                }
-                else
-                {
-                    throw;
-                }
+                AuthenticationProperties properties = BuildAuthenticationPropertiesForIncrementalConsent(scopes, ex);
+                return Challenge(properties);
             }
+        }
+
+        private static async Task<string> CreateBlob(string accessToken)
+        {
+            // create a blob on behalf of the user
+            TokenCredential tokenCredential = new TokenCredential(accessToken);
+            StorageCredentials storageCredentials = new StorageCredentials(tokenCredential);
+            // replace the URL below with your storage account URL
+            CloudBlockBlob blob = new CloudBlockBlob(new Uri("https://blobstorageazuread.blob.core.windows.net/sample-container/Blob1.txt"), storageCredentials);
+            await blob.UploadTextAsync("Blob created by Azure AD authenticated user.");
+            return "Blob successfully created";
         }
 
         public async Task<IActionResult> Contact()
@@ -86,30 +82,9 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
             }
             catch (MsalUiRequiredException ex)
             {
-                if (CanbeSolvedByReSignInUser(ex))
-                {
-                    AuthenticationProperties properties = BuildAuthenticationPropertiesForIncrementalConsent(scopes, ex);
-                    return Challenge(properties);
-                }
-                else
-                {
-                    throw;
-                }
+                AuthenticationProperties properties = BuildAuthenticationPropertiesForIncrementalConsent(scopes, ex);
+                return Challenge(properties);
             }
-        }
-
-        private static bool CanbeSolvedByReSignInUser(MsalUiRequiredException ex)
-        {
-            bool canbeSolvedByReSignInUser = true;
-
-            // ex.ErrorCode != MsalUiRequiredException.UserNullError indicates a cache problem 
-            // as when calling Contact we should have an
-            // authenticate user (see the [Authenticate] attribute on the controller, but
-            // and therefore its account should be in the cache
-            // In the case of an InMemoryCache, this can happen if the server was restarted
-            // as the cache is in the server memory
-
-            return canbeSolvedByReSignInUser;
         }
 
         /// <summary>
