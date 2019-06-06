@@ -11,11 +11,10 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApp_OpenIDConnect_DotNet.Models;
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Azure.Storage.Auth;
+using Microsoft.Azure.Storage.Blob;
 
 namespace WebApp_OpenIDConnect_DotNet.Controllers
 {
@@ -53,7 +52,9 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
                 StorageCredentials storageCredentials = new StorageCredentials(tokenCredential);
 
                 // replace the URL below with your storage account URL
-                CloudBlockBlob blob = new CloudBlockBlob(new Uri("https://blobstorageazuread.blob.core.windows.net/sample-container/Blob1.txt"), storageCredentials); 
+                CloudBlockBlob blob = new CloudBlockBlob(
+                                      new Uri("https://<storage-account>.blob.core.windows.net/<container>/Blob1.txt"), 
+                                      storageCredentials); 
                 await blob.UploadTextAsync("Blob created by Azure AD authenticated user.");
 
                 ViewData["Message"] = "Blob successfully created";
