@@ -1,12 +1,15 @@
 ---
-services: active-directory
-platforms: dotnet
-author: maliksahil
-level: 200
-client: ASP.NET Core .Web App
-service: Microsoft Graph, Azure Storage, ASP.NET Core Web API
-endpoint: AAD v2.0
+page_type: sample
+languages:
+- csharp
+- html
+products:
+- azure
+description: "This is accompanying code sample for the article at https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-app"
+urlFragment: storage-dotnet-azure-ad-msal
 ---
+
+
 # Tutorial - Enable your Web Apps to sign-in users and call Azure storage APIs with the Microsoft identity platform for developers
 
 This is accompanying code sample for the article at https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-app
