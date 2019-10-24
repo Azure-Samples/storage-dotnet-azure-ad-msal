@@ -5,14 +5,15 @@ languages:
 - html
 products:
 - azure
-description: "This is accompanying code sample for the article at https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-app"
+- azure-active-directory
+- azure-storage
+description: "This is accompanying code sample for the article at https://docs.microsoft.com/azure/storage/common/storage-auth-aad-app."
 urlFragment: storage-dotnet-azure-ad-msal
 ---
 
+# App sign-in and Azure Storage API with Microsoft identity platform
 
-# Tutorial - Enable your Web Apps to sign-in users and call Azure storage APIs with the Microsoft identity platform for developers
-
-This is accompanying code sample for the article at https://docs.microsoft.com/en-us/azure/storage/common/storage-auth-aad-app
+This is accompanying code sample for the article at https://docs.microsoft.com/azure/storage/common/storage-auth-aad-app.
 
 ## Community Help and Support
 
