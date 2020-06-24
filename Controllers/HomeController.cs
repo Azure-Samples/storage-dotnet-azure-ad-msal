@@ -1,21 +1,12 @@
 ﻿using System;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Identity.Client;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApp_OpenIDConnect_DotNet.Models;
 using Microsoft.WindowsAzure.Storage.Auth;
 using Microsoft.WindowsAzure.Storage.Blob;
+using Microsoft.Identity.Web;
 
 namespace WebApp_OpenIDConnect_DotNet.Controllers
 {
@@ -41,21 +32,14 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
             return View();
         }
 
+        [AuthorizeForScopes(Scopes = new string[] { "https://storage.azure.com/user_impersonation" })]
         public async Task<IActionResult> Blob()
         {
             var scopes = new string[] { "https://storage.azure.com/user_impersonation" };
-            try
-            {
-                var accessToken =
-                    await _tokenAcquisition.GetAccessTokenOnBehalfOfUser(HttpContext, scopes);
-                ViewData["Message"] = await CreateBlob(accessToken);
-                return View();
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                AuthenticationProperties properties = BuildAuthenticationPropertiesForIncrementalConsent(scopes, ex);
-                return Challenge(properties);
-            }
+            var accessToken =
+                await _tokenAcquisition.GetAccessTokenForUserAsync(scopes);
+            ViewData["Message"] = await CreateBlob(accessToken);
+            return View();
         }
 
         private static async Task<string> CreateBlob(string accessToken)
@@ -64,79 +48,10 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
             TokenCredential tokenCredential = new TokenCredential(accessToken);
             StorageCredentials storageCredentials = new StorageCredentials(tokenCredential);
             // replace the URL below with your storage account URL
-            CloudBlockBlob blob = new CloudBlockBlob(new Uri("https://blobstorageazuread.blob.core.windows.net/sample-container/Blob1.txt"), storageCredentials);
+            Uri blobUri = new Uri("https://blobstorageazuread123.blob.core.windows.net/sample-container/Blob1.txt");
+            CloudBlockBlob blob = new CloudBlockBlob(blobUri, storageCredentials);
             await blob.UploadTextAsync("Blob created by Azure AD authenticated user.");
             return "Blob successfully created";
-        }
-
-        public async Task<IActionResult> Contact()
-        {
-            var scopes = new string[] { "user.read" };
-            try
-            {
-                var accessToken = await _tokenAcquisition.GetAccessTokenOnBehalfOfUser(HttpContext, scopes);
-                dynamic me = await CallGraphApiOnBehalfOfUser(accessToken);
-
-                ViewData["Me"] = me;
-                return View();
-            }
-            catch (MsalUiRequiredException ex)
-            {
-                AuthenticationProperties properties = BuildAuthenticationPropertiesForIncrementalConsent(scopes, ex);
-                return Challenge(properties);
-            }
-        }
-
-        /// <summary>
-        /// Build Authentication properties needed for an incremental consent.
-        /// </summary>
-        /// <param name="scopes">Scopes to request</param>
-        /// <returns>AuthenticationProperties</returns>
-        private AuthenticationProperties BuildAuthenticationPropertiesForIncrementalConsent(string[] scopes, MsalUiRequiredException ex)
-        {
-            AuthenticationProperties properties = new AuthenticationProperties();
-
-            // Set the scopes, including the scopes that ADAL.NET / MASL.NET need for the Token cache
-            string[] additionalBuildInScopes = new string[] { "openid", "offline_access", "profile" };
-            properties.SetParameter<ICollection<string>>(OpenIdConnectParameterNames.Scope, scopes.Union(additionalBuildInScopes).ToList());
-
-            // Attempts to set the login_hint to avoid the logged-in user to be presented with an account selection dialog
-            string loginHint = HttpContext.User.GetLoginHint();
-            if (!string.IsNullOrWhiteSpace(loginHint))
-            {
-                properties.SetParameter<string>(OpenIdConnectParameterNames.LoginHint, loginHint);
-
-                string domainHint = HttpContext.User.GetDomainHint();
-                properties.SetParameter<string>(OpenIdConnectParameterNames.DomainHint, domainHint);
-            }
-
-            // Additional claims required (for instance MFA)
-            if (!string.IsNullOrEmpty(ex.Claims))
-            {
-                properties.Items.Add("claims", ex.Claims);
-            }
-
-            return properties;
-        }
-
-        private static async Task<dynamic> CallGraphApiOnBehalfOfUser(string accessToken)
-        {
-            //
-            // Call the Graph API and retrieve the user's profile.
-            //
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
-            var response = await client.GetAsync("https://graph.microsoft.com/Beta/me");
-            if (response.StatusCode == HttpStatusCode.OK)
-            {
-                var content = await response.Content.ReadAsStringAsync();
-                dynamic me = JsonConvert.DeserializeObject(content);
-                return me;
-            }
-            else
-            {
-                throw new HttpRequestException($"Invalid status code in the HttpResponseMessage: {response.StatusCode}.");
-            }
         }
 
         [AllowAnonymous]
