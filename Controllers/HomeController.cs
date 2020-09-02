@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
-using System.Threading.Tasks;
-using WebApp_OpenIDConnect_DotNet.Models;
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.Identity.Web;
+using Azure.Core;
+using Azure.Storage.Blobs;
+using WebApp_OpenIDConnect_DotNet.Models;
+using Azure.Identity;
 
 namespace WebApp_OpenIDConnect_DotNet.Controllers
 {
@@ -44,13 +47,18 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
 
         private static async Task<string> CreateBlob(string accessToken)
         {
-            // create a blob on behalf of the user
-            TokenCredential tokenCredential = new TokenCredential(accessToken);
-            StorageCredentials storageCredentials = new StorageCredentials(tokenCredential);
-            // replace the URL below with your storage account URL
-            Uri blobUri = new Uri("https://blobstorageazuread123.blob.core.windows.net/sample-container/Blob1.txt");
-            CloudBlockBlob blob = new CloudBlockBlob(blobUri, storageCredentials);
-            await blob.UploadTextAsync("Blob created by Azure AD authenticated user.");
+            // Replace the URL below with the URL to your blob.
+            Uri blobUri = new Uri("https://storagesamples.blob.core.windows.net/sample-container/blob1.txt");
+            BlobClient blobClient = new BlobClient(blobUri, new AuthorizationCodeCredential(accessToken)); // what kind of credential do we want here???
+
+            // Create a blob on behalf of the user.
+            string blobContents = "Blob created by Azure AD authenticated user.";
+            byte[] byteArray = Encoding.ASCII.GetBytes(blobContents);
+
+            using (MemoryStream stream = new MemoryStream(byteArray))
+            {
+                await blobClient.UploadAsync(stream);
+            }
             return "Blob successfully created";
         }
 
