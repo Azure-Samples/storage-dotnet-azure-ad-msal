@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using WebApp_OpenIDConnect_DotNet.Models;
-using Microsoft.WindowsAzure.Storage.Auth;
-using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.Identity.Web;
+using WebAppOpenIDConnectDotNet;
+using Azure.Storage.Blobs;
+using System.Text;
+using System.IO;
 
 namespace WebApp_OpenIDConnect_DotNet.Controllers
 {
@@ -28,29 +30,29 @@ namespace WebApp_OpenIDConnect_DotNet.Controllers
         public IActionResult About()
         {
             ViewData["Message"] = "Your application description page.";
-
             return View();
         }
 
         [AuthorizeForScopes(Scopes = new string[] { "https://storage.azure.com/user_impersonation" })]
         public async Task<IActionResult> Blob()
         {
-            var scopes = new string[] { "https://storage.azure.com/user_impersonation" };
-            var accessToken =
-                await _tokenAcquisition.GetAccessTokenForUserAsync(scopes);
-            ViewData["Message"] = await CreateBlob(accessToken);
+            string message = await CreateBlob(new TokenAcquisitionTokenCredential(_tokenAcquisition));
+            ViewData["Message"] = message;
             return View();
         }
 
-        private static async Task<string> CreateBlob(string accessToken)
+        private static async Task<string> CreateBlob(TokenAcquisitionTokenCredential tokenCredential)
         {
-            // create a blob on behalf of the user
-            TokenCredential tokenCredential = new TokenCredential(accessToken);
-            StorageCredentials storageCredentials = new StorageCredentials(tokenCredential);
-            // replace the URL below with your storage account URL
             Uri blobUri = new Uri("https://blobstorageazuread123.blob.core.windows.net/sample-container/Blob1.txt");
-            CloudBlockBlob blob = new CloudBlockBlob(blobUri, storageCredentials);
-            await blob.UploadTextAsync("Blob created by Azure AD authenticated user.");
+            BlobClient blobClient = new BlobClient(blobUri, tokenCredential);
+
+            string blobContents = "Blob created by Azure AD authenticated user.";
+            byte[] byteArray = Encoding.ASCII.GetBytes(blobContents);
+
+            using (MemoryStream stream = new MemoryStream(byteArray))
+            {
+                await blobClient.UploadAsync(stream);
+            }
             return "Blob successfully created";
         }
 

@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Identity.Web;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Identity.Web.UI;
-using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 namespace WebApp_OpenIDConnect_DotNet
 {
@@ -33,16 +33,10 @@ namespace WebApp_OpenIDConnect_DotNet
                 options.HandleSameSiteCookieCompatibility();
             });
 
-            services.AddOptions();
-            services.AddSignIn(Configuration);
-
-            // Token acquisition service based on MSAL.NET
-            // and chosen token cache implementation
-            services.AddWebAppCallsProtectedWebApi(Configuration, new string[] { "user.read"}).AddInMemoryTokenCaches();
-
-            // // Add APIs
-            // services.AddGraphService(Configuration);
-            // services.AddHttpClient<IArmOperations, ArmApiOperationService>();
+            services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+                    .AddMicrosoftIdentityWebApp(Configuration.GetSection("AzureAd"))
+                        .EnableTokenAcquisitionToCallDownstreamApi(null)
+                            .AddInMemoryTokenCaches();
 
             services.AddControllersWithViews(options =>
             {
